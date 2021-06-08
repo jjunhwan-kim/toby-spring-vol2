@@ -1,21 +1,20 @@
 package tobyspring.springbook.learningtest.spring.ioc;
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
-import tobyspring.springbook.learningtest.spring.ioc.bean.Hello;
-import tobyspring.springbook.learningtest.spring.ioc.bean.Printer;
-import tobyspring.springbook.learningtest.spring.ioc.bean.StringPrinter;
+import tobyspring.springbook.learningtest.spring.ioc.bean.*;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -105,5 +104,43 @@ class ApplicationContextTest {
 
         hello.print();
         assertThat(printer.toString()).isEqualTo("Hello Child");
+    }
+
+    @Test
+    public void simpleBeanScanning() {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext("tobyspring.springbook.learningtest.spring.ioc.bean");
+
+        assertThrows(NoSuchBeanDefinitionException.class, () -> ctx.getBean("hello", Hello.class));
+
+        AnnotatedHello hello = ctx.getBean("myAnnotatedHello", AnnotatedHello.class);
+        assertThat(hello).isNotNull();
+    }
+
+    @Test
+    public void filteredBeanScanning() {
+        ApplicationContext ctx = new GenericXmlApplicationContext("/filteredScanningContext.xml");
+
+        // 포인트컷 표현식으로 빈 자동등록시 @Component 애노테이션 필요 없음
+        Hello hello = ctx.getBean("hello", Hello.class);
+        assertThat(hello).isNotNull();
+
+        AnnotatedHello annotatedHello = ctx.getBean("myAnnotatedHello", AnnotatedHello.class);
+        assertThat(annotatedHello).isNotNull();
+    }
+
+    @Test
+    public void configurationBean() {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotatedHelloConfig.class);
+
+        AnnotatedHello hello = ctx.getBean("annotatedHello", AnnotatedHello.class);
+        assertThat(hello).isNotNull();
+
+        AnnotatedHelloConfig config = ctx.getBean("annotatedHelloConfig", AnnotatedHelloConfig.class);
+        assertThat(config).isNotNull();
+
+        assertThat(config.annotatedHello()).isSameAs(hello);
+        assertThat(config.annotatedHello()).isSameAs(config.annotatedHello());
+
+        System.out.println(ctx.getBean("systemProperties").getClass());
     }
 }
