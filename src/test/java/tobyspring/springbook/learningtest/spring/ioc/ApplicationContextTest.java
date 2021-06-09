@@ -143,4 +143,24 @@ class ApplicationContextTest {
 
         System.out.println(ctx.getBean("systemProperties").getClass());
     }
+
+    @Test
+    void constructorArgName() {
+        ApplicationContext ac = new GenericXmlApplicationContext("/constructorInjection.xml");
+
+        Hello hello = ac.getBean("hello", Hello.class);
+        hello.print();
+
+        assertThat(ac.getBean("printer").toString()).isEqualTo("Hello Spring");
+    }
+
+    @Test
+    public void autowire() {
+        ApplicationContext ac = new GenericXmlApplicationContext("/autowire.xml");
+
+        Hello hello = ac.getBean("hello", Hello.class);
+        hello.print();
+
+        assertThat(ac.getBean("printer").toString()).isEqualTo("Hello Spring");
+    }
 }
