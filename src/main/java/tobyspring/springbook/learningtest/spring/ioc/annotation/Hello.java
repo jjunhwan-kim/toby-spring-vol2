@@ -1,4 +1,6 @@
-package tobyspring.springbook.learningtest.spring.ioc.bean;
+package tobyspring.springbook.learningtest.spring.ioc.annotation;
+
+import javax.annotation.Resource;
 
 public class Hello {
     String name;
@@ -16,23 +18,20 @@ public class Hello {
         this.printer = printer;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Resource
+    public void setPrinter(Printer printer) {
+        this.printer = printer;
+    }
+
     public String sayHello() {
         return "Hello " + name;
     }
 
     public void print() {
         this.printer.print(sayHello());
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setPrinter(Printer printer) {
-        this.printer = printer;
-    }
-
-    public Printer getPrinter() {
-        return printer;
     }
 }
