@@ -8,6 +8,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.GenericXmlApplicationContext;
 import tobyspring.springbook.learningtest.spring.ioc.annotation.Hello;
 
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -53,4 +57,24 @@ class AnnotationConfigurationTest {
     interface Service {}
     static class ServiceA implements Service {}
     static class ServiceB implements Service {}
+
+    @Test
+    public void atInject() {
+        ApplicationContext ac = new AnnotationConfigApplicationContext(IClient.class, IServiceA.class, IServiceB.class);
+        IClient iclient = ac.getBean(IClient.class);
+        assertThat(iclient.service).isInstanceOf(IServiceA.class);
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Qualifier    // DIJ qualifier
+    @interface Main {}
+
+    static class IClient {
+        @Inject
+        @Main Service service;
+    }
+
+    @Main
+    static class IServiceA implements Service {}
+    static class IServiceB implements Service {}
 }
