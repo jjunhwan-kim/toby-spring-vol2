@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ValueInjectionTest {
     @Test
-    public void propertyEditor() {
+    void propertyEditor() {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(BeanPE.class);
         BeanPE bean = ac.getBean(BeanPE.class);
 
@@ -39,8 +39,8 @@ class ValueInjectionTest {
     }
 
     @Test
-    public void collectionInject() {
-        ApplicationContext ac = new GenericXmlApplicationContext(new ClassPathResource("/collection.xml", getClass()));
+    void collectionInject() {
+        ApplicationContext ac = new GenericXmlApplicationContext("/collection.xml");
         BeanC bean = ac.getBean(BeanC.class);
 
         assertThat(bean.nameList.size()).isEqualTo(3);

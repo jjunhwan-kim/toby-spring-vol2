@@ -59,7 +59,7 @@ class AnnotationConfigurationTest {
     static class ServiceB implements Service {}
 
     @Test
-    public void atQualifier() {
+    void atQualifier() {
         ApplicationContext ac = new AnnotationConfigApplicationContext(QClient.class, QServiceA.class, QServiceB.class);
         QClient qclient = ac.getBean(QClient.class);
         assertThat(qclient.service).isInstanceOf(QServiceA.class);
@@ -74,7 +74,7 @@ class AnnotationConfigurationTest {
     static class QServiceB implements Service {}
 
     @Test
-    public void atInject() {
+    void atInject() {
         ApplicationContext ac = new AnnotationConfigApplicationContext(IClient.class, IServiceA.class, IServiceB.class);
         IClient iclient = ac.getBean(IClient.class);
         assertThat(iclient.service).isInstanceOf(IServiceA.class);

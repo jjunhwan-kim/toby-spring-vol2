@@ -107,7 +107,7 @@ class ApplicationContextTest {
     }
 
     @Test
-    public void simpleBeanScanning() {
+    void simpleBeanScanning() {
         ApplicationContext ctx = new AnnotationConfigApplicationContext("tobyspring.springbook.learningtest.spring.ioc.bean");
 
         assertThrows(NoSuchBeanDefinitionException.class, () -> ctx.getBean("hello", Hello.class));
@@ -117,7 +117,7 @@ class ApplicationContextTest {
     }
 
     @Test
-    public void filteredBeanScanning() {
+    void filteredBeanScanning() {
         ApplicationContext ctx = new GenericXmlApplicationContext("/filteredScanningContext.xml");
 
         // 포인트컷 표현식으로 빈 자동등록시 @Component 애노테이션 필요 없음
@@ -129,7 +129,7 @@ class ApplicationContextTest {
     }
 
     @Test
-    public void configurationBean() {
+    void configurationBean() {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotatedHelloConfig.class);
 
         AnnotatedHello hello = ctx.getBean("annotatedHello", AnnotatedHello.class);
@@ -155,7 +155,7 @@ class ApplicationContextTest {
     }
 
     @Test
-    public void autowire() {
+    void autowire() {
         ApplicationContext ac = new GenericXmlApplicationContext("/autowire.xml");
 
         Hello hello = ac.getBean("hello", Hello.class);

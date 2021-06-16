@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AutoRegisteredBeansTest {
     @Test
-    public void autoRegisteredBean() {
+    void autoRegisteredBean() {
         System.getProperties().put("os.name", "Hi");
 
         ApplicationContext ac = new AnnotationConfigApplicationContext(SystemBean.class);
