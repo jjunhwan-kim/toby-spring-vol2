@@ -2,10 +2,15 @@ package tobyspring.springbook.learningtest.spring.ioc;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -53,11 +58,34 @@ class ScopeTest {
         assertThat(bean.size()).isEqualTo(4);
     }
 
+    @Component("prototypeBean")
     @Scope("prototype")
     static class PrototypeBean {}
 
     static class PrototypeClientBean {
         @Autowired	PrototypeBean bean1;
         @Autowired	PrototypeBean bean2;
+    }
+
+    @Test
+    public void objectFactory() {
+        ApplicationContext ac = new AnnotationConfigApplicationContext(PrototypeBean.class, ObjectFactoryConfig.class);
+        ObjectFactory<PrototypeBean> factoryBeanFactory = ac.getBean("prototypeBeanFactory", ObjectFactory.class);
+
+        Set<PrototypeBean> bean = new HashSet<PrototypeBean>();
+        for (int i = 1; i <= 4; i++) {
+            bean.add(factoryBeanFactory.getObject());
+            assertThat(bean.size()).isEqualTo(i);
+        }
+    }
+
+    @Configuration
+    static class ObjectFactoryConfig {
+        @Bean
+        public ObjectFactoryCreatingFactoryBean prototypeBeanFactory() {
+            ObjectFactoryCreatingFactoryBean factoryBean = new ObjectFactoryCreatingFactoryBean();
+            factoryBean.setTargetBeanName("prototypeBean");
+            return factoryBean;
+        }
     }
 }
