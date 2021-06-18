@@ -1,17 +1,20 @@
 package tobyspring.springbook.learningtest.spring.ioc;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean;
+import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,7 +71,7 @@ class ScopeTest {
     }
 
     @Test
-    public void objectFactory() {
+    void objectFactory() {
         ApplicationContext ac = new AnnotationConfigApplicationContext(PrototypeBean.class, ObjectFactoryConfig.class);
         ObjectFactory<PrototypeBean> factoryBeanFactory = ac.getBean("prototypeBeanFactory", ObjectFactory.class);
 
@@ -87,5 +90,64 @@ class ScopeTest {
             factoryBean.setTargetBeanName("prototypeBean");
             return factoryBean;
         }
+    }
+
+    @Test
+    void serviceLocatorFactoryBean() {
+        ApplicationContext ac = new AnnotationConfigApplicationContext(PrototypeBean.class, ServiceLocatorConfig.class);
+        PrototypeBeanFactory factory = ac.getBean(PrototypeBeanFactory.class);
+
+        Set<PrototypeBean> bean = new HashSet<PrototypeBean>();
+        for (int i = 1; i <= 4; i++) {
+            bean.add(factory.getPrototypeBean());
+            assertThat(bean.size()).isEqualTo(i);
+        }
+    }
+
+    interface PrototypeBeanFactory {
+        PrototypeBean getPrototypeBean();
+    }
+
+    @Configuration
+    static class ServiceLocatorConfig {
+        @Bean
+        ServiceLocatorFactoryBean prototypeBeanFactory() {
+            ServiceLocatorFactoryBean factoryBean = new ServiceLocatorFactoryBean();
+            factoryBean.setServiceLocatorInterface(PrototypeBeanFactory.class);
+            return factoryBean;
+        }
+    }
+
+    @Test
+    void prototypeMethodInjection() {
+        ApplicationContext ac = new GenericXmlApplicationContext("/prototypeMethodInjection.xml");
+        AbstractPrototypeBeanFactory factory = ac.getBean(AbstractPrototypeBeanFactory.class);
+
+        Set<PrototypeBean> bean = new HashSet<PrototypeBean>();
+        for (int i = 1; i <= 4; i++) {
+            bean.add(factory.getPrototypeBean());
+            assertThat(bean.size()).isEqualTo(i);
+        }
+    }
+
+    abstract static class AbstractPrototypeBeanFactory {
+        abstract PrototypeBean getPrototypeBean();
+    }
+
+    @Test
+    public void provideryTest() {
+        ApplicationContext ac = new AnnotationConfigApplicationContext(PrototypeBean.class, ProviderClient.class);
+        ProviderClient client = ac.getBean(ProviderClient.class);
+
+        Set<PrototypeBean> bean = new HashSet<PrototypeBean>();
+        for(int i=1; i<=4; i++) {
+            bean.add(client.prototypeBeanProvider.get());
+            assertThat(bean.size()).isEqualTo(i);
+        }
+    }
+
+    static class ProviderClient {
+        @Inject
+        Provider<PrototypeBean> prototypeBeanProvider;
     }
 }
