@@ -2,11 +2,14 @@ package tobyspring.springbook.learningtest.spring.ioc;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -18,6 +21,68 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ValueInjectionTest {
+    @Test
+    public void valueInjection() {
+        AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(BeanSP.class, ConfigSP.class);
+        BeanSP bean = ac.getBean(BeanSP.class);
+        assertThat(bean.name).isEqualTo("Mac OS X");
+        assertThat(bean.username).isEqualTo("Spring");
+
+        assertThat(bean.hello.name).isEqualTo("Spring");
+    }
+
+    static class BeanSP {
+        @Value("#{systemProperties['os.name']}")    // 시스템 프로퍼티
+        String name;
+        @Value("${database.username}")
+        String username;
+        @Value("${os.name}")
+        String osname;
+        @Autowired
+        Hello hello;
+    }
+
+    @Configuration
+    @PropertySource("database.properties")
+    static class ConfigSP {
+        @Bean
+        Hello hello(@Value("${database.username}") String username) {
+            Hello hello = new Hello();
+            hello.name = username;
+            return hello;
+        }
+
+        @Bean
+        static PropertySourcesPlaceholderConfigurer pspc() {
+            return new PropertySourcesPlaceholderConfigurer();
+        }
+    }
+
+    static class Hello {
+        String name;
+    }
+
+    @Test
+    void importResource() {
+        AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ConfigIR.class);
+        BeanSP bean = ac.getBean(BeanSP.class);
+
+        assertThat(bean.name).isEqualTo("Mac OS X");
+        assertThat(bean.username).isEqualTo("Spring");
+    }
+
+    @ImportResource("/properties2.xml")
+    @Configuration
+    static class ConfigIR {
+        @Bean
+        public BeanSP beanSp() {
+            return new BeanSP();
+        }
+        @Bean Hello hello() {
+            return new Hello();
+        }
+    }
+
     @Test
     void propertyEditor() {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(BeanPE.class);
